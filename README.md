@@ -9,7 +9,7 @@ My version focuses on **containerization, debugging, and deployment setup**.
 ---
 
 ## 🔹 What I Did
-- **Dockerized the application**: created Dockerfiles for frontend, backend, and database.  
+- **Dockerized the application**: created Dockerfiles for frontend, and backend.  
 - **Multi-container setup**: instead of running everything in one container, I separated services into three connected containers without relying on Docker Compose.  
 - **Database runtime script**: added a script to handle DB connection since Docker Compose wasn't used.  
 - **Config fixes**:
