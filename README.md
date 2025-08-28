@@ -1,134 +1,80 @@
-# ![RealWorld Example App](logo.png)
+# Conduit RealWorld Example App – Dockerized Version
 
-> **React / Vite + SWC / Express.js / Sequelize / PostgreSQL codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://realworld.io/) spec and API.**
+This is my Dockerized version of the [Conduit RealWorld Example App](https://github.com/gothinkster/realworld),  
+a fullstack project built with **React, Express.js, Sequelize, and PostgreSQL**.  
 
-This codebase was created to demonstrate a fully fledged fullstack application built with **React / Vite + SWC / Express.js / Sequelize / PostgreSQL** including CRUD operations, authentication, routing, pagination, and more.
-
-**[Demo app](https://conduit-realworld-example-app.fly.dev/)&nbsp;&nbsp;|&nbsp;&nbsp;[With Create React App](https://github.com/TonyMckes/conduit-realworld-example-app/tree/create-react-app)&nbsp;&nbsp;|&nbsp;&nbsp;[Other RealWorld Example Apps](https://codebase.show/projects/realworld?category=fullstack)**
-
-> For more information on how to this works with other frontends/backends, head over to the [RealWorld](https://github.com/gothinkster/realworld) repo.
+The original project demonstrates CRUD operations, authentication, routing, pagination, and more.  
+My version focuses on **containerization, debugging, and deployment setup**.  
 
 ---
 
-## Getting Started
+## 🔹 What I Did
+- **Dockerized the application**: created Dockerfiles for frontend, backend, and database.  
+- **Multi-container setup**: instead of running everything in one container, I separated services into three connected containers without relying on Docker Compose.  
+- **Database runtime script**: added a script to handle DB connection since Docker Compose wasn't used.  
+- **Config fixes**:
+  - Fixed `.env` misconfiguration (database was set to SQL instead of PostgreSQL).  
+  - Corrected API URLs for Docker networking.  
+- **Learning-focused restructuring**: adapted a monorepo/microservice-style codebase to a multi-container architecture for clarity and practice.  
 
-These instructions will help you install and run the project on your local machine for development and testing.
+---
 
-### Prerequisites
+## 🔹 Tech Stack
+- **Frontend**: React (Vite + SWC)  
+- **Backend**: Express.js + Sequelize  
+- **Database**: PostgreSQL  
+- **Containerization**: Docker  
 
-Before you run the project, make sure that you have the following tools and software installed on your computer:
+---
 
-- Text editor/IDE (e.g., VS Code, Sublime Text, Atom)
-- [Git](https://git-scm.com/downloads)
-- [Node.js](https://nodejs.org/en/download/) `v18.11.0+`
-- [NPM](https://www.npmjs.com/) (usually included with Node.js)
-- SQL database
+## 🔹 Running the Project with Docker
 
-### Installation
+### 1. Clone the repository
+```bash
+git clone https://github.com/opeyemiorugun/conduit-realworld-example-app-docker.git
+cd conduit-realworld-example-app-docker
+````
 
-To install the project on your computer, follow these steps:
-
-1. Clone the repository to your local machine.
-
-   ```bash
-   git clone https://github.com/TonyMckes/conduit-realworld-example-app.git
-   ```
-
-2. Navigate to the project directory.
-
-   ```bash
-   cd conduit-realworld-example-app
-   ```
-
-3. Install project dependencies by running the command:
-
-   ```bash
-   npm install
-   ```
-
-### Configuration
-
-1. Create a `.env` file in the root directory of the project
-2. Add the required environment variables as specified in the [`.env.example`](backend/.env.example) file
-3. (Optional) update the Sequelize configuration parameters in the [`config.js`](backend/config/config.js) file
-4. If you are **not** using PostgreSQL, you may also have to install the driver for your database:
-
-   <details>
-   <summary>Use one of the following commands to install:</summary><br/>
-
-   > Note: `-w backend` option is used to install it in the backend [`package.json`](backend/package.json).
-
-   ```bash
-   npm install -w backend pg pg-hstore  # Postgres (already installed)
-   npm install -w backend mysql2
-   npm install -w backend mariadb
-   npm install -w backend sqlite3
-   npm install -w backend tedious       # Microsoft SQL Server
-   npm install -w backend oracledb      # Oracle Database
-   ```
-
-   > :information_source: Visit [Sequelize - Installing](https://sequelize.org/docs/v6/getting-started/#installing) for more infomation.
-
-   ***
-
-   </details>
-
-5. Create database specified by configuration by executing
-
-   > :warning: Please, make sure you have already created a superuser for your database.
-
-   ```bash
-   npm run sqlz -- db:create
-   ```
-
-   > :information_source: The command `npm run sqlz` is an alias for `npx -w backend sequelize-cli`.  
-   > Execute `npm run sqlz -- --help` to see more of `sequelize-cli` commands availables.
-
-6. Optionally you can run the following command to populate your database with some dummy data:
-
-   ```bash
-   npm run sqlz -- db:seed:all
-   ```
-
-### Usage
-
-#### Development Server
-
-To run the project, follow these steps:
-
-1. Start the development server by executing the command:
-
-   ```bash
-   npm run dev
-   ```
-
-2. Open a web browser and navigate to:
-   - Home page should be available at [`http://localhost:3000/`](http://localhost:3000).
-   - API endpoints should be available at [`http://localhost:3001/api`](http://localhost:3001/api).
-
-#### Running Tests
-
-To run tests, simply run the following command:
+### 2. Build Docker images for frontend and backend
 
 ```bash
-npm run test
+cd frontend
+docker build . -t conduit-frontend 
+
+cd ../backend
+docker build . -t conduit-backend
+cd ..
 ```
-
-#### Production
-
-The following command will build the production version of the app:
+### 3. Create network
+```bash
+docker network create conduit_network
+```
+### 3. Run containers
 
 ```bash
-npm run start
+docker run -d --name db --network conduit_network --env-file backend/.env.example postgres
+docker run -d -p 3001:3001 --name app --network conduit-network --env-file backend/.env.example conduit-backend
+docker run -d -p 3000:3000 --name frontend-server --network conduit-network conduit-frontend
 ```
 
-## License
+### 4. Access the app
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+* Frontend: [http://localhost:3000](http://localhost:3000)
+* Backend API: [http://localhost:3001/api](http://localhost:3001/api)
 
-## Acknowledgments
+---
 
-- [RealWorld](https://realworld.io/)
-- [RealWorld (GitHub)](https://github.com/gothinkster/realworld)
-- [CodebaseShow](https://codebase.show/)
-- [How to write a Good readme](https://bulldogjob.com/news/449-how-to-write-a-good-readme-for-your-github-project)
+## 🔹 Notes
+
+* This setup avoids Docker Compose intentionally — the runtime script handles DB connections directly and container network is setup manually.
+* Useful for understanding **manual container orchestration and networking**.
+
+---
+
+## 🔹 Original Project
+
+This project is based on the [Conduit RealWorld Example App](https://github.com/TonyMckes/conduit-realworld-example-app.git).
+I do not own the original project — this version is for **learning purposes and to showcase my Docker setup and fixes**.
+
+---
+
