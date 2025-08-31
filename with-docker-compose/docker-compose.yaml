@@ -1,0 +1,23 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+  backend:
+    build: ./backend
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    depends_on:
+      - db
+    env_file:
+      - ./backend/.env.example
+  db:
+    image: postgres
+    env_file:
+      - ./backend/.env.example
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
