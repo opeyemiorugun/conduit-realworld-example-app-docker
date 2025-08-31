@@ -1,7 +1,7 @@
 # Conduit RealWorld Example App – Dockerized Version
 
-This is my Dockerized version of the [Conduit RealWorld Example App](https://github.com/gothinkster/realworld),  
-a fullstack project built with **React, Express.js, Sequelize, and PostgreSQL**.  
+This is my Dockerized version of the [Conduit RealWorld Example App](https://github.com/TonyMckes/conduit-realworld-example-app.git),  
+a fullstack project built with **React (Vite + SWC), Express.js, Sequelize, and PostgreSQL**.  
 
 The original project demonstrates CRUD operations, authentication, routing, pagination, and more.  
 My version focuses on **containerization, debugging, and deployment setup**.  
@@ -9,13 +9,16 @@ My version focuses on **containerization, debugging, and deployment setup**.
 ---
 
 ## 🔹 What I Did
-- **Dockerized the application**: created Dockerfiles for frontend, and backend.  
-- **Multi-container setup**: instead of running everything in one container, I separated services into three connected containers without relying on Docker Compose.  
-- **Database runtime script**: added a script to handle DB connection since Docker Compose wasn't used.  
+- **Dockerized the application**: created Dockerfiles for frontend, backend, and database.  
+- **Two setups provided**:
+  - `with-docker-compose/` → all services orchestrated with Docker Compose.  
+  - `without-docker-compose/` → manual multi-container setup (frontend, backend, DB).  
+- **Database runtime and migration script**: ensured DB connection works without Compose.  
+  *Database migrations are run automatically by the backend container’s entrypoint script when the container starts.*
 - **Config fixes**:
-  - Fixed `.env` misconfiguration (database was set to SQL instead of PostgreSQL).  
+  - Fixed `.env.example` misconfiguration (database was set to SQL instead of PostgreSQL).  
   - Corrected API URLs for Docker networking.  
-- **Learning-focused restructuring**: adapted a monorepo/microservice-style codebase to a multi-container architecture for clarity and practice.  
+- **Learning-focused restructuring**: adapted a monorepo/microservice-style codebase to a multi-container architecture.  
 
 ---
 
@@ -23,51 +26,91 @@ My version focuses on **containerization, debugging, and deployment setup**.
 - **Frontend**: React (Vite + SWC)  
 - **Backend**: Express.js + Sequelize  
 - **Database**: PostgreSQL  
-- **Containerization**: Docker  
+- **Containerization**: Docker & Docker Compose  
 
 ---
 
-## 🔹 Running the Project with Docker
+# 🚀 Running the Project
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/opeyemiorugun/conduit-realworld-example-app-docker.git
-cd conduit-realworld-example-app-docker
-````
+You can run this project in two ways:  
+1. [With Docker Compose](#-option-1-run-with-docker-compose) (recommended, easier)  
+2. [Without Docker Compose](#-option-2-run-without-docker-compose) (manual setup for learning)  
 
-### 2. Build Docker images for frontend and backend
+---
 
-```bash
-cd frontend
-docker build . -t conduit-frontend 
+## 🔹 Option 1: Run with Docker Compose
 
-cd ../backend
-docker build . -t conduit-backend
-cd ..
-```
+This is the easiest way to bring up the fullstack app (frontend + backend + PostgreSQL) with one command.
+
+### Steps
+1. Navigate to the `with-docker-compose` folder:
+   ```bash
+   cd with-docker-compose
+    ```
+
+2. Start all services:
+
+   ```bash
+   docker-compose up --build
+   ```
+
+3. Access the app:
+
+   * Frontend: [http://localhost:3000](http://localhost:3000)
+   * Backend API: [http://localhost:3001/api](http://localhost:3001/api)
+
+4. Stop services:
+
+   ```bash
+   docker-compose down
+   ```
+
+---
+
+## 🔹 Option 2: Run without Docker Compose
+
+This method uses individual containers and Docker networking.
+It’s useful for understanding how containers connect without an orchestration tool.
+
+### Steps
+
+1. Navigate to the `without-docker-compose` folder:
+
+   ```bash
+   cd without-docker-compose
+   ```
+
+2. Build Docker images:
+
+   ```bash
+   docker build -t conduit-frontend ./frontend
+   docker build -t conduit-backend ./backend
+   ```
+
 ### 3. Create network
 ```bash
-docker network create conduit_network
+docker network create conduit-network
 ```
-### 3. Run containers
+### 4. Run containers
 
 ```bash
-docker run -d --name db --network conduit_network --env-file backend/.env.example postgres
+docker run -d --name db --network conduit-network --env-file backend/.env.example postgres
 docker run -d -p 3001:3001 --name app --network conduit-network --env-file backend/.env.example conduit-backend
 docker run -d -p 3000:3000 --name frontend-server --network conduit-network conduit-frontend
 ```
 
-### 4. Access the app
+5. Access the app:
 
-* Frontend: [http://localhost:3000](http://localhost:3000)
-* Backend API: [http://localhost:3001/api](http://localhost:3001/api)
+   * Frontend: [http://localhost:3000](http://localhost:3000)
+   * Backend API: [http://localhost:3001/api](http://localhost:3001/api)
 
 ---
 
 ## 🔹 Notes
 
-* This setup avoids Docker Compose intentionally — the runtime script handles DB connections directly and container network is setup manually.
-* Useful for understanding **manual container orchestration and networking**.
+* Both methods (with and without Compose) achieve the same goal.
+* Docker Compose is **simpler and closer to real-world deployment**, while the manual method is great for **learning container networking**.
+* PostgreSQL data is persisted using a Docker volume (`pgdata`).
 
 ---
 
@@ -75,6 +118,4 @@ docker run -d -p 3000:3000 --name frontend-server --network conduit-network cond
 
 This project is based on the [Conduit RealWorld Example App](https://github.com/TonyMckes/conduit-realworld-example-app.git).
 I do not own the original project — this version is for **learning purposes and to showcase my Docker setup and fixes**.
-
----
 
